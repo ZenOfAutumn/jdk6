@@ -1,0 +1,49 @@
+各版本java的提升。
+
+
+java se5.0 特点：
+
+1. 类型安全
+   - 可转换的类型，例： C++可强制转换指针类型，即非安全的。 char* xx = "sfdsf";  使用时即使有： (int*)xx 编译器也不会报错。
+   而java是类型安全的。 除继承，泛化等特殊类型关系之外，是不可强制转换的。
+*. 枚举安全
+    之前版本：
+           enum season_1 = 1;
+	   int  L1 =1;
+          if(xxx == season_1 ) 的判断时，xxx可以为L1,可以直接为1，都可以通过。而我们想要的效果是对season进行判断。
+     新版本：
+           enum类型 设计与class相似， 有域和方法。
+*.  循环： 集合类带迭代器 iterators,可使用for-each遍历集合。
+*.  静态引入： import static
+*.  注解
+*.  GenericTypeSafe
+*.  可变参数列表
+   varArgs
+   实参可以是同类型的多个参数， 也可以是一个该类型的数组。
+   当编译器遇到可变参数列表时，会将之翻译成一个数组。
+
+java6 无
+
+java7
+1. 二进制常量：  可提高可读性。
+  int xx = ob00110001
+2. switch语句中可使用String。
+3.  泛化实例创建时可使用类型引用。
+  TypeInference_GenericInstanceCreation
+  Map<String,List<String>> myMap = new HashMap<>(); 实例化时，参数列表为空集 来 代替具体的参数类型。
+4. 一个catch语句处理多种异常
+    CatchMoreException
+    exp: catch(IOException |NullPointerException ex){
+    }
+5.try-with-resources
+  try(BufferedReader br = new BufferedReader(new FileReader("")){
+    return br.readLine();
+  }
+  将一个或多个数据源定义在try（）中。可自动关闭输入源。
+6.可变参数方法使用非具体格式的参数时，提供编译时警告： 堆污染， 同时运行时报错。
+HeapPollutionExample
+ArrayBuilder
+ public static <T> void addToList (List<T> listArg, T... elements)
+
+ @SafeVarargs可取消堆污染警告
+

@@ -1,0 +1,111 @@
+1. 泛型类
+//泛型类 , 泛型参数列表 <T>置于类名后
+class Stack<T>{
+
+}
+2.泛型接口
+interface Generator<T>{ T next();}
+3. 泛型方法
+ 是否拥有泛型方法，与所在的类是否为泛型没有关系。
+  使方法能够独立于类而产生变化 。： 无论何时，尽量用泛型方法
+  泛型参数列表置于返回值之前
+  public class GenericMethods{
+    public <T> void f(T x){
+
+    }
+  }
+ 4. 可变参数与泛型方法
+    class GenericVarargs{
+        public static <T> List<T> makeList(T... args){
+            List<T> result = new ArrayList<T>();
+            for(T item: args){
+                result.add(item);
+            }
+            return result;
+        }
+    }
+  5. 擦除
+  Java泛型是通过擦除来实现的。
+   在泛型代码内部，无法获得任何有关泛型参数类型的信息
+   擦除的代价：无法显示地引用运行时类型的操作之中，例如：转型，instanceof, new表达式
+  6.擦除的边界- i泛型的所有动作都发生在边界处，——反编译字节文件可知 exp: Chapter15_SimpleHolder
+  由于擦除在方法体中移除了类型信息，所以在运行时的问题就是边界:即对象进入和离开方法的地点 - 编译器在编译期执行类型检查并插入转型代码的地点
+
+  7.擦除的补偿
+  擦除丢失了在泛型中执行某些操作的能力，任何在运行时需要知道确切类型信息的操作都无法工作。
+  补偿：
+    显式地传递你的的Class对象，以便可以在表达 式中使用。
+
+    class ClassTypeCapture<T>{
+    Class<T> kind;
+    public ClassTypeCapture(Class<T> kind){
+        this.kind = kind;
+
+    }
+ }
+  ClassTypeCapture<Cat> ctt1 = new ClassTypeCapture<Cat>(Cat.class);
+
+ 8.泛型实例
+ new T() 无法实现， 原因： 编译器不能验证T具有默认（无参）构造器
+ 解决：传递一个工厂对象，例Class对象-newInstance()
+ 注： Cat.class将产生一个class对象
+ 对于Integer这种没有默认构造器的类型，需要使用显式工厂
+ interface Factory<T>{
+    T create();
+ }
+ class IntegerFactory implements Factory<Integer>{
+    public Integer create(){return new Integer(0);}
+ }
+9 泛型数组
+不能创建泛型数组，解决：
+任何需要创建泛型数组的地方用ArrayList
+List<T> array = new ArrayList<T>();
+
+10 边界
+    边界使得可以在用于泛型的参数类型上设置限制条件。
+    exp:
+    class Colored<T extend HasColor>{
+        T item;
+    }
+11 通配符
+    List<Fruit> list = new ArrayList<Apple>(); //
+    <? extend Fruit> :可读不可写，因为编译无法检查具体类型
+    <? super Apple> ： 超通配符， 可读可写
+13 无界通配符: ?
+可以是任何类型
+List与List<?>区别：
+List: 持有任何Object类型的原生List
+List<?>： 具有某种特定炻的非原生List
+
+
+12 自限定类型
+class Self<T extends T>>{
+
+}
+新创建的类，它继承自一个泛型类型，该泛型类型接受我的类的名字作为其参数。
+CRG本质： 基类用导出类代替其参数 - mean:泛型基类变成其所有导出类的公共功能的模板， 即这些功能对于其所有参数和返回值，将使用
+ 即： 在所产生的类中将使用确切类型而非基类
+
+ 13 参数 协变
+  方法参数类型会随子类而变化
+
+
+14. 装饰器模式
+ 使用分层对象来动态盘里地向单个对象中添加责任，装饰器指定包装在最初对象周围的所有对象都具有相同的基本接口。
+ 持有原有对象 - 使用组合和形式化结构实现
+ class Basic{
+    private String value;
+    puvlic void set(String val){this.val = val;}
+ }
+ class Decorator extends Basic{
+    protected Basic basic;
+    public Decorator(Basic basic){this.basic= basic;}
+    public void set(String val){basic.set(val);}
+ }
+ public TimeStamped extends Decorator{
+    public final long timeStamp;
+    public TimeStamped(Basic basic){
+        super(basic);
+    }
+    timeStamp = new Date().getTime();
+ }

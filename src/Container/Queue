@@ -1,0 +1,4 @@
+1.Queue
+  将LinkedList向上转型为Queue
+  Queue<Integer> queue = new LinkedList<Integer>();
+  2. PrioryQueue

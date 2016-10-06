@@ -1,0 +1,111 @@
+
+chapter11
+1
+添加一组元素
+Collections.addAll(Collection<? super T> c, T... elements)//工具类Collections的静态方法
+Collection.addAll(Collection<? extends E> c); //Collection实例方法
+2. 容器的打印
+Arrays.toString() - 产生数组的可打印表示
+但是打印容器，无需要帮助。直接打印：
+ ArrayList/HashMap   some = new ArrayLIst/HashMap ();
+ 打印方式均为：
+ System.out.println(some);
+3.List
+List在Collection基础上添加很多方法
+ arrayList, LinkedList 性能比较： 随机访问，List中间插入，删除
+ LinkedList 应用： 链表，栈，队列 ，双端队列
+4.Set具有与Collection完全一样的接口，因此没有任何额外的功能，不同于List
+5.Stack
+ java无Stack接口，但可
+ 使用LinkedList对 第一个元素getFirst()操作来实现
+6.Queue 队列接口
+  将LinkedList向上转型为Queue
+  Queue<Integer> queue = new LinkedList<Integer>();
+ 7. PriorityQueue
+ 优先级队列接口
+ 调用offer()方法插入对象时，会在队列中排序，默认排序为队列中自然顺序，但可以提供自己的Comparator来修改顺序。
+ PriorityQueue可以确保调用peek(),poll(),remove()方法时，获取的都是优先级最高的元素。
+
+8. Iterator与Collection
+9. Foreach与迭代器
+ foreach主要应用于数组，但也应用于任何Collection对象。
+
+chapter13 _字符串
+1.不可变String , StringBuilder
+ 多个子符串通过“+”连接，在编译时，会使用StringBuilder.append()
+ 最好自己创建StringBuilder
+2. 格式化输出
+printf("Row 1: [%d,%f]",x,y); 或format("Row 1: [%d,%f]",x,y)
+类型转换：
+d       f
+c       e
+b       h
+s       %
+3 正则表达式
+4. split()
+5. java.util.Scanner
+ 扫描输入
+ Scanner stdin = new Scanner(System.in);
+ int = stdin.nextInt();
+
+
+ Chapter14 类型信息
+ 1. why need RIIT
+ List<Shape> shapeList = Array.asList(new Circle(),new Square(),new Triangle());
+ for(Shape shape : shapeList){
+   shape.draw();
+ }
+ 输出：
+   Circle.draw();
+   Square.draw();
+   Trianggle.draw();
+   从数组取元素时，这种容器-实际上将所有事物当Object对待-会自动转型回Shape，但转型得并不彻底，转为Shape,而不是Circle,Square,Triangle
+   编译时，由容器及Java提供的泛型保证系统确保 ，运行时，由类型转换操作来确保。
+   then 多态机制，Square实际执行的代码，由引用所指具体对象决定 。
+ 问题：如何 能够知道 某个泛化引用的确切类型，就可以使用最简单方式去处理。
+
+ 使用RTTI 可以查询某个Shape引用所指向对象的确切类型，然后选择或剔除特例
+ 2. Class对象
+  类型信息在运行时期的表示 -由Class对象的特殊对象完成
+  每当编译一个新类，会自动产生一个Class对象，生成该类的对象的程序的JVM将使用“类加载器”子系统。
+  所有的类在对其第一次使用时，动态加载到JVM
+  当程序 创建第一个对类的静态成员引用时，就会加载Class类。 ——证明构造器也是类的静态方法，即使构造器没有static关键字                   --动态加载
+ 3.Class.forName() 无论何时，只要你想在运行时使用类型信息，就必须首先获得对恰当的Class对象的引用
+ Class c = null;
+ try{
+   c = Class.forName("typeInfo.toys.FancyToy");
+ }
+ Class.new Instance():实现虚拟构造器的一种途径
+ Class up = c.getSupperClass();
+ Object ob =null;
+ ob = up.getInstance();  //我不知道你的确切类型，但无论如何要正确创建你自己
+
+ 4.类字面常量  String.class
+  一种生成对Class对象的引用，在编译时会受到检查，根除了forName()方法的调用。
+  可应用于：普通类，接口，数组，基本数据类型
+  exp: int.class
+
+  为了使用类而做的准备工作：
+    1.加载 ： 类加载器执行，查找字节码，并从中创建一个Classi对象
+    2.链接： 验证类中的字节码，为静态域分配存储空间，解析这个类创建的对其他类的所有引用
+    3.初始化： 若该类具有超类，则对其初始化，执行静态初始化器和静态初始化块。
+   初始化被延迟到了对静态方法或者非常数静态域首次引用才执行。      ---尽可能的惰性
+   仅对.class语法来获得类的引用不会引发初始化，但为了产生Class引用，Class.forName()立即就执行了初始化。
+ 5.类型检查
+  instanceof: if(x instanceof Dog)
+  动态的instanceof: if(x .isInstance(pet)
+
+  6. 反射
+  运行时的类信息
+  若不知道某个对象的确切类型，RTTI可以解决。但是,限制： 这个类型在编译时必须已知，才能使用RTTI识别 。
+  Class类与java.lang.reflect类库一起对反射的概念进行了支持。
+  7. RTTI与反射区别
+  对RTTI来说，编译器以编译时打开和检查.class文件
+  对反射机制来说，.class文件在编译时不可获取，所以是在运行时打开和检查.class文件
+  8
+    Class.getMethods()
+    Class.getConstructors()
+  9 动态代理
+
+  10. 修改访问权限
+  Method g = a.getClass.get

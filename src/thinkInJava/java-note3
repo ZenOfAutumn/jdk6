@@ -1,0 +1,105 @@
+                                基于jdk5                       （利用java特性解决实际问题）
+charpter4.
+ 1. 高精度数字
+ BigInteger, BigDecimal
+ 2. for-each语句
+ 适用于数组和容器
+ 3.continue与标签
+标签 存在的理由： 循环嵌套存在，想从中break或continue;
+
+chapter5
+1.初始化
+  类中变量按出现顺序进行初始化。
+  类中域自动初始化：基本类型——零值，对象——null
+  初始化顺序 ：
+    静态对象、代码块按顺序——>非静态对象 ——>构造器
+    注：构造器实际上也是静态方法
+
+2.enum
+enum是一个类，并且可以在switch语句内使用。
+Exp： 某一商品属性有多个值时，用enum 并switch
+3 Arrays.toString(数组)
+  产生一维数组的可打印版本。
+chapter7
+1. final关键字
+final数据： 编译时常量，永不改变。
+            必须在域定义处或构造器里用表达式对final赋值。
+            基本类型则值不变，对象则引用不变，但对象自身是可改变的。
+            exp: final int i = 0;  final Person person;
+final参数：mean 无法在方法中更改引用所指向的对象
+        exp:
+        public static void finalParam(final Person person){
+        // person = new Person();  error!
+        }
+final方法： 禁止覆盖
+final类：禁止继承
+2.继承初始化
+    加载： 当时被调用的对象的类、基类、基类的基类……
+    初始化：基类静态成员初始化->导出类静态成员初始化->
+            基类成员变量、构造方法——>
+            导出类成员变量、构造方法。
+    exp: WR  resolve that cglib 's proxy don't execute setter function,only the way like "object.member"去调用 对象的成员
+         by utilize 初始化顺序（先基类构造函数，后父类构造函数）
+chapter8:
+1.多态： 动态绑定\运行期绑定
+2.构造器的调用顺序
+基类的构造器总是在导出类的构造过程中被调用，而且按照继承 层次逐步向上链接 。
+ 编译器强制每个导出类部分都必须调用构造器的原因：
+    任何构造器内部，整个对象可能只是部分形成。
+    一般基类的域是private的，只有基类的构造器才具有恰当的知识和权限来对自己的元素进行初始化，因此必须令所有构造器都得到调用。
+    exp: class Chapter7 :Father,Girl
+3.构造器内部的多态方法的行为
+  分析Chapter8类Class PolyConstructos打印的结果
+4.协变返回类型
+在导出类中的被覆盖方法可以返回 基类方法返回类型的某种导出类型
+
+chapter9
+1. 策略模式
+  根据所传递的参数对象的不同，而具有不同行为的方法
+2.适配器模式
+  无法修改想要使用的类，例如来自类库的类。
+3. interface中的域： static 且 final
+
+chapter10
+1 内部类
+  .this与 .new
+  public class OuterClass{
+    public class InnerClass{
+    }
+  }
+  普通内部类保存了一个引用，指向创建它的外围类对象
+
+2. 匿名内部类
+   构造器无命名
+   场景： 返回一个抽象类的实例化对象，而该对象的实现类只需要用到一次。
+   exp:AnonymousConstructor
+   在JS中经常用到。
+3. 嵌套类
+    public class OuterClass{
+      public static class InnerClass{
+      }
+    }
+    嵌套类与内部类区别：
+    1. 嵌套类为static修饰。故：
+        要创建嵌套类对象，并不需要其外围类的对象；
+        不能从嵌套类的对象中访问非静态的外围类对象。
+        可以包含static数据，static字段
+    2.内部类
+       普通内部类的字段与方法，只能放在类的外部层次上，故不能有static数据和static字段。
+4.内部类作用：
+   原因: 每个内部类都能独立地继承自一个（接口）的实现，所以无论外围类是否已经继承了某个（接口的）实现，对于内部类都没有影响。
+   有效地实现“多重继承”，内部类允许继承多个非接口类型
+    Exp: 在一个类中以某种方式实现两个接口
+5 闭包与回调
+  Callee2 && Closure
+6. 控制框架
+  控制框架是一类特殊的应用框架，它用来解决响应事件的需求。主要用来响应事件系统—事件驱动系统 。
+  内部类是如何允许简单的创建过程以及如何使用控制框架的？
+    exp:一个控制框架，它的工作就是在事件“就绪”时执行事件。对于要控制什么，控制框架并不包含任何具体的信息。那些信息是在实现算法的action（）部分，通过继承来提供的。
+7 局部内部类
+  代码块里创建内部类
+  不能访问说明符，因为它不是外围类的一部分
+  使用局部内部类而非匿名类场景： 需要不止一个该内部类的对象
+
+
+

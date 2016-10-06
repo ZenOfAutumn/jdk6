@@ -1,0 +1,20 @@
+1. 对象数组 与 基本类型数组
+  前者保存引用，后者保存值
+
+  2. 复制数组
+  System.arrayCopy()比for更有效
+
+  3. Arrays实用功能
+  Arrays.sort() 排序
+  Arrays.equals()
+  Arrays.binarySearch() 在已经排序的数组中查找元素
+  Arrays.toString()
+  Arrays.hashCode()
+  Arrays.fill() 填充
+
+ 4.数组的比较
+   数组元素的比较  ： 1，实现java.lang.Comparable接口，使类具有”天生“的比较能力。 2.覆盖equals()方法
+  exp: CompType
+ 5. 数组排序
+ 只要该对象实现 了Comparable接口
+
