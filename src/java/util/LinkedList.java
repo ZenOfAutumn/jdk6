@@ -71,18 +71,23 @@ package java.util;
  * @param <E> the type of elements held in this collection
  */
 
+/**
+实现的接口：List,Deque(队列接口），Cloneable, 序列化接口
+
+ */
 public class LinkedList<E>
     extends AbstractSequentialList<E>
-    implements List<E>, Deque<E>, Cloneable, java.io.Serializable
+    implements List<E>, Deque<E>, Cloneable, java.io.Serializable              // ?为什么不用import,而是带包名引入 #TODO
 {
-    private transient Entry<E> header = new Entry<E>(null, null, null);
+    //头指针 : next域 用于指向第一个元素， previous域指向最后一个元素
+    private transient Entry<E> header = new Entry<E>(null, null, null);     //? 为什么 ArrayList,LinkedList的成员均是transient?
     private transient int size = 0;
 
     /**
      * Constructs an empty list.
      */
     public LinkedList() {
-        header.next = header.previous = header;
+        header.next = header.previous = header;    //每个元素 均有一个 next指针 和 一个previous指针 。
     }
 
     /**
@@ -194,7 +199,7 @@ public class LinkedList<E>
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by {@link Collection#add})
      */
-    public boolean add(E e) {
+    public boolean add(E e) { //add()方法将元素加在队头
 	addBefore(e, header);
         return true;
     }
@@ -212,7 +217,7 @@ public class LinkedList<E>
      * @param o element to be removed from this list, if present
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(Object o) {
+    public boolean remove(Object o) {     //移除元素， 遍历队列，寻找目标元素进行移除
         if (o==null) {
             for (Entry<E> e = header.next; e != header; e = e.next) {
                 if (e.element==null) {
@@ -262,6 +267,37 @@ public class LinkedList<E>
      * @throws IndexOutOfBoundsException {@inheritDoc}
      * @throws NullPointerException if the specified collection is null
      */
+    /**模拟
+     * 原链表：  a, b, c, d, e,f
+     * 新插入数据： 1,2,3,4 ,插入位置 =2，
+     * 此时，插入第一个节点后状态：
+      a b c 1 d e  f
+     第二个节点：
+     a b c 1 2 d e f
+     第三个节点：
+     a b  c  1 2 3 d e f
+     第四个节点：
+     a b c  1 2 3 4 d e f
+     注：
+     通过 前继指针predecessor的移动 建立 前一个元素previous指向当前元素
+     通过 新建节点时，建立当前元素 与其previous,next的关系
+      一次循环：previous <----cur------>next
+                previous ---->
+      第二次循环：
+                                <-——--cur2  ------>next
+                                -——-->cur2
+     结束：
+                                             <————
+     优化点：
+      在整个过程从前往后逐个插入时，不断更新predecessor指针,以记录下一个节点的previous
+     而successor指针没有发生过变化 。
+     故，
+       Entry<E> e = new Entry<E>((E)a[i],sucdessor,null);
+     jdk8中 实现了这种优化。
+
+
+     jdk8中 LinkedList.addAll()方法与 jdk6有很大的变化
+     */
     public boolean addAll(int index, Collection<? extends E> c) {
         if (index < 0 || index > size)
             throw new IndexOutOfBoundsException("Index: "+index+
@@ -272,13 +308,19 @@ public class LinkedList<E>
             return false;
 	modCount++;
 
-        Entry<E> successor = (index==size ? header : entry(index));
-        Entry<E> predecessor = successor.previous;
+        Entry<E> successor = (index==size ? header : entry(index));//记录插入点的下一个节点
+        Entry<E> predecessor = successor.previous;              //记录插入点的前一个节点
 	for (int i=0; i<numNew; i++) {
-            Entry<E> e = new Entry<E>((E)a[i], successor, predecessor);
-            predecessor.next = e;
-            predecessor = e;
+            Entry<E> e = new Entry<E>((E)a[i], successor, predecessor);// 新建节点， 节点的next,prevous域
+            predecessor.next = e; //前继的next域指向新节点
+            predecessor = e;  //当前节点作为 下一个待插入节点前继
         }
+        /*
+       当前节点cur的next域指sucessor, previous域指向predecessor
+       predecessor指针指向的节点 next域 指向 当前节点
+       然后predecessor 指向 cur
+       故cur 在下一轮循环时，next域会更新为下一轮的新节点。
+         */
         successor.previous = predecessor;
 
         size += numNew;
@@ -359,6 +401,12 @@ public class LinkedList<E>
 
     /**
      * Returns the indexed entry.
+     */
+
+    /**
+    高效查找指定位置的元素
+     如果 index < size的1/2, 则从前向后查找
+     否则，从后往前查找
      */
     private Entry<E> entry(int index) {
         if (index < 0 || index >= size)

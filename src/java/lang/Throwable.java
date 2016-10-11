@@ -127,6 +127,10 @@ import  java.io.*;
  * @version %I%, %G%
  * @since JDK1.0
  */
+/**
+ Throwable实现了Serializable接口
+ 故在远程访问时，可以打印远程机器抛出的异常
+ */
 public class Throwable implements Serializable {
     /** use serialVersionUID from JDK 1.0.2 for interoperability */
     private static final long serialVersionUID = -3042686055658047285L;

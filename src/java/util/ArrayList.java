@@ -78,6 +78,18 @@ package java.util;
  * @see	    Vector
  * @since   1.2
  */
+/**
+ ArrayList 底层为一个数组
+ 插入，删除效率较低：
+ 当原容量不足时，会申请新数组，使用System.copyArray()将元素复制到新数组
+ 插入，或删除时，需要移动一段索引范围的元素时，同样采用System.copyArray()以复制形式进行移动
+ 访问效率较高：
+ 基于索引访问
+
+ 序列化方式：
+    将列表所有元素逐个序列化。
+ 而ArrayList的 数组 是不可序列化的。
+ */
 
 public class ArrayList<E> extends AbstractList<E>
         implements List<E>, RandomAccess, Cloneable, java.io.Serializable
@@ -88,6 +100,9 @@ public class ArrayList<E> extends AbstractList<E>
      * The array buffer into which the elements of the ArrayList are stored.
      * The capacity of the ArrayList is the length of this array buffer.
      */
+	/**
+	 * transient修饰- --底层实现数组
+	 */
     private transient Object[] elementData;
 
     /**
@@ -140,7 +155,7 @@ public class ArrayList<E> extends AbstractList<E>
      * list's current size.  An application can use this operation to minimize
      * the storage of an <tt>ArrayList</tt> instance.
      */
-    public void trimToSize() {
+    public void trimToSize() {  //缩小尺寸到元素个数
 	modCount++;
 	int oldCapacity = elementData.length;
 	if (size < oldCapacity) {
@@ -155,6 +170,13 @@ public class ArrayList<E> extends AbstractList<E>
      *
      * @param   minCapacity   the desired minimum capacity
      */
+	/**
+	检查容量，若不够，
+	申请新数组。
+	首先，扩充为原来的1.5位加1
+	若仍不够，以参数作为新数组长度
+	将元素复制到新数据
+	 */
     public void ensureCapacity(int minCapacity) {
 	modCount++;
 	int oldCapacity = elementData.length;
@@ -226,6 +248,9 @@ public class ArrayList<E> extends AbstractList<E>
      * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
      * or -1 if there is no such index.
      */
+	/**
+	 * 元素最后一次出现的位置
+	 */
     public int lastIndexOf(Object o) {
 	if (o == null) {
 	    for (int i = size-1; i >= 0; i--)
@@ -233,7 +258,7 @@ public class ArrayList<E> extends AbstractList<E>
 		    return i;
 	} else {
 	    for (int i = size-1; i >= 0; i--)
-		if (o.equals(elementData[i]))
+		if (o.equals(elementData[i]))                 //基于equals比较， 自定义Bean类最好覆盖equals()方法
 		    return i;
 	}
 	return -1;
@@ -318,6 +343,11 @@ public class ArrayList<E> extends AbstractList<E>
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+
+	/**
+	 * 实现随机访问：
+	 *    根据下标取数据   elementaData[index]
+	 */
     public E get(int index) {
 	RangeCheck(index);
 
@@ -333,6 +363,9 @@ public class ArrayList<E> extends AbstractList<E>
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+	/**
+	 * set元素到指定位置，返回原来的值。
+	* */
     public E set(int index, E element) {
 	RangeCheck(index);
 
@@ -347,6 +380,10 @@ public class ArrayList<E> extends AbstractList<E>
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by {@link Collection#add})
      */
+	/**
+	 * 增加元素
+	检查容量是否满足：当前元素个数+1
+	 */
     public boolean add(E e) {
 	ensureCapacity(size + 1);  // Increments modCount!!
 	elementData[size++] = e;
@@ -362,6 +399,9 @@ public class ArrayList<E> extends AbstractList<E>
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
+	/**
+	 * 在指定位置插入元素
+	 */
     public void add(int index, E element) {
 	if (index > size || index < 0)
 	    throw new IndexOutOfBoundsException(
@@ -369,7 +409,7 @@ public class ArrayList<E> extends AbstractList<E>
 
 	ensureCapacity(size+1);  // Increments modCount!!
 	System.arraycopy(elementData, index, elementData, index + 1,
-			 size - index);
+			 size - index);//被插入位置及其后元素后移
 	elementData[index] = element;
 	size++;
     }
@@ -392,8 +432,8 @@ public class ArrayList<E> extends AbstractList<E>
 	int numMoved = size - index - 1;
 	if (numMoved > 0)
 	    System.arraycopy(elementData, index+1, elementData, index,
-			     numMoved);
-	elementData[--size] = null; // Let gc do its work
+			     numMoved);//指定位置其后元素前移
+	elementData[--size] = null; // Let gc do its work  将最后一个位置置null
 
 	return oldValue;
     }
@@ -432,6 +472,8 @@ public class ArrayList<E> extends AbstractList<E>
      * Private remove method that skips bounds checking and does not
      * return the value removed.
      */
+	/**快速移除： index后面元素前移-复制方式。
+	 * */
     private void fastRemove(int index) {
         modCount++;
         int numMoved = size - index - 1;
@@ -445,6 +487,10 @@ public class ArrayList<E> extends AbstractList<E>
      * Removes all of the elements from this list.  The list will
      * be empty after this call returns.
      */
+	/**
+	列表清空。 所有位置元素置 null : gc会认为之前的对象不再被使用，从而回收。
+	 长度置0
+	 */
     public void clear() {
 	modCount++;
 
@@ -468,7 +514,7 @@ public class ArrayList<E> extends AbstractList<E>
      * @return <tt>true</tt> if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null
      */
-    public boolean addAll(Collection<? extends E> c) {
+    public boolean addAll(Collection<? extends E> c) {  //一个ArrayLIst可以放入该类及其导出类
 	Object[] a = c.toArray();
         int numNew = a.length;
 	ensureCapacity(size + numNew);  // Increments modCount
@@ -501,7 +547,7 @@ public class ArrayList<E> extends AbstractList<E>
 	int numNew = a.length;
 	ensureCapacity(size + numNew);  // Increments modCount
 
-	int numMoved = size - index;
+	int numMoved = size - index;                //需要移动的元素数量
 	if (numMoved > 0)
 	    System.arraycopy(elementData, index, elementData, index + numNew,
 			     numMoved);
@@ -542,7 +588,7 @@ public class ArrayList<E> extends AbstractList<E>
      * negative: It is always used immediately prior to an array access,
      * which throws an ArrayIndexOutOfBoundsException if index is negative.
      */
-    private void RangeCheck(int index) {
+    private void RangeCheck(int index) {  //范围检查
 	if (index >= size)
 	    throw new IndexOutOfBoundsException(
 		"Index: "+index+", Size: "+size);
@@ -556,7 +602,7 @@ public class ArrayList<E> extends AbstractList<E>
      *             instance is emitted (int), followed by all of its elements
      *             (each an <tt>Object</tt>) in the proper order.
      */
-    private void writeObject(java.io.ObjectOutputStream s)
+    private void writeObject(java.io.ObjectOutputStream s)        //序列化： 调用ObjectOutStream.writeObject依次对列表元素进行输出
         throws java.io.IOException{
 	// Write out element count, and any hidden stuff
 	int expectedModCount = modCount;
