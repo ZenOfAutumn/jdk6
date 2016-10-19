@@ -316,6 +316,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
+     * 返回前面的子集
      */
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
 	return new TreeSet<E>(m.headMap(toElement, inclusive));
@@ -328,6 +329,7 @@ public class TreeSet<E> extends AbstractSet<E>
      *         not permit null elements
      * @throws IllegalArgumentException {@inheritDoc}
      * @since 1.6
+     * 返回尾部的子集
      */
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
 	return new TreeSet<E>(m.tailMap(fromElement, inclusive));

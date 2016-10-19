@@ -280,7 +280,7 @@ public class LinkedHashMap<K,V>
         Entry<K,V> e = (Entry<K,V>)getEntry(key);
         if (e == null)
             return null;
-        e.recordAccess(this);
+        e.recordAccess(this);//记录访问顺序
         return e.value;
     }
 
@@ -315,12 +315,18 @@ public class LinkedHashMap<K,V>
         /**
          * Inserts this entry before the specified existing entry in the list.
          */
-        private void addBefore(Entry<K,V> existingEntry) {
+        private void addBefore(Entry<K,V> existingEntry) { //增加到已存在元素前面
             after  = existingEntry;
             before = existingEntry.before;
             before.after = this;
             after.before = this;
         }
+        /*
+        参考：http://www.cnblogs.com/children/archive/2012/10/02/2710624.html
+        header头结点： after域指向第一个结点，before域指向最后一个结点
+                      最后一个结点的after指向header
+
+         */
 
         /**
          * This method is invoked by the superclass whenever the value
@@ -328,12 +334,15 @@ public class LinkedHashMap<K,V>
          * If the enclosing Map is access-ordered, it moves the entry
          * to the end of the list; otherwise, it does nothing.
          */
-        void recordAccess(HashMap<K,V> m) {
+        /*
+       记录访问顺序 ，将最新访问的添加到双向链表的表头，并从原来的位置删除
+         */
+        void recordAccess(HashMap<K,V> m) { //维持链表的访问顺序，被访问过的元素将移到链表尾。
             LinkedHashMap<K,V> lm = (LinkedHashMap<K,V>)m;
             if (lm.accessOrder) {
                 lm.modCount++;
                 remove();
-                addBefore(lm.header);
+                addBefore(lm.header); //
             }
         }
 
@@ -403,9 +412,10 @@ public class LinkedHashMap<K,V>
      * removes the eldest entry if appropriate.
      */
     void addEntry(int hash, K key, V value, int bucketIndex) {
-        createEntry(hash, key, value, bucketIndex);
+        createEntry(hash, key, value, bucketIndex); //将新元素以双向链表形式加入到映射中
 
         // Remove eldest entry if instructed, else grow capacity if appropriate
+        //删除最近最少使用的策略定义
         Entry<K,V> eldest = header.after;
         if (removeEldestEntry(eldest)) {
             removeEntryForKey(eldest.key);
@@ -439,11 +449,15 @@ public class LinkedHashMap<K,V>
      * entries and then delete the eldest entry each time a new entry is
      * added, maintaining a steady state of 100 entries.
      * <pre>
+     *     例：重写此方法，
+     *     维持此映射只保存100个条目 的稳定状态，
+     *     在每次添加新条目时，若尺寸超过100，则删除最旧的条目。
      *     private static final int MAX_ENTRIES = 100;
      *
      *     protected boolean removeEldestEntry(Map.Entry eldest) {
      *        return size() > MAX_ENTRIES;
      *     }
+     *
      * </pre>
      *
      * <p>This method typically does not modify the map in any way,
@@ -468,7 +482,15 @@ public class LinkedHashMap<K,V>
      * @return   <tt>true</tt> if the eldest entry should be removed
      *           from the map; <tt>false</tt> if it should be retained.
      */
+    /*
+    LRU过期机制
+
+    可用于，每次添加addEntry 新条目时，移除最旧条目的实现
+     */
     protected boolean removeEldestEntry(Map.Entry<K,V> eldest) {
         return false;
     }
+    /*
+    默认返回 false 表示元素永不过期
+     */
 }

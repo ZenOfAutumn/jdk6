@@ -104,6 +104,7 @@ import java.io.*;
  * @since   1.2
  */
 
+
 public class HashMap<K,V>
     extends AbstractMap<K,V>
     implements Map<K,V>, Cloneable, Serializable
@@ -221,7 +222,7 @@ public class HashMap<K,V>
      */
     public HashMap(Map<? extends K, ? extends V> m) {
         this(Math.max((int) (m.size() / DEFAULT_LOAD_FACTOR) + 1,
-                      DEFAULT_INITIAL_CAPACITY), DEFAULT_LOAD_FACTOR);
+                      DEFAULT_INITIAL_CAPACITY), DEFAULT_LOAD_FACTOR); //检查m中装载数量是否超过装载因子
         putAllForCreate(m);
     }
 
@@ -302,7 +303,7 @@ public class HashMap<K,V>
              e != null;
              e = e.next) {
             Object k;
-            if (e.hash == hash && ((k = e.key) == key || key.equals(k)))
+            if (e.hash == hash && ((k = e.key) == key || key.equals(k)))//key判断方法： 满足hash值相等，且（key= 或 key.equals）满足。故，最好实现equals方法
                 return e.value;
         }
         return null;
@@ -369,9 +370,9 @@ public class HashMap<K,V>
     public V put(K key, V value) {
         if (key == null)
             return putForNullKey(value);
-        int hash = hash(key.hashCode());
-        int i = indexFor(hash, table.length);
-        for (Entry<K,V> e = table[i]; e != null; e = e.next) {
+        int hash = hash(key.hashCode()); //使用key自身的hashCode方法再次hash
+        int i = indexFor(hash, table.length); //将hash值映射到表中位置i。
+        for (Entry<K,V> e = table[i]; e != null; e = e.next) {//从位置i开始查找元素，若存在，则覆盖，并返回旧值
             Object k;
             if (e.hash == hash && ((k = e.key) == key || key.equals(k))) {
                 V oldValue = e.value;
@@ -381,8 +382,8 @@ public class HashMap<K,V>
             }
         }
 
-        modCount++;
-        addEntry(hash, key, value, i);
+        modCount++;            //修改计数器+1
+        addEntry(hash, key, value, i);//若待插入元素，key不存在，则放于i位置链表中
         return null;
     }
 
@@ -451,7 +452,7 @@ public class HashMap<K,V>
      *        capacity is MAXIMUM_CAPACITY (in which case value
      *        is irrelevant).
      */
-    void resize(int newCapacity) {
+    void resize(int newCapacity) { //扩容
         Entry[] oldTable = table;
         int oldCapacity = oldTable.length;
         if (oldCapacity == MAXIMUM_CAPACITY) {
@@ -459,25 +460,25 @@ public class HashMap<K,V>
             return;
         }
 
-        Entry[] newTable = new Entry[newCapacity];
+        Entry[] newTable = new Entry[newCapacity];//扩容方式：重新申请一个数组
         transfer(newTable);
         table = newTable;
-        threshold = (int)(newCapacity * loadFactor);
+        threshold = (int)(newCapacity * loadFactor); //扩容后重新计算阈值
     }
 
     /**
      * Transfers all entries from current table to newTable.
      */
-    void transfer(Entry[] newTable) {
+    void transfer(Entry[] newTable) { //将当前列表导入到新表：for循环遍历原表，映射到新表的桶中，原表桶位置置null
         Entry[] src = table;
         int newCapacity = newTable.length;
-        for (int j = 0; j < src.length; j++) {
+        for (int j = 0; j < src.length; j++) {  //列表槽位循环
             Entry<K,V> e = src[j];
             if (e != null) {
                 src[j] = null;
-                do {
+                do {                          //遍历链表
                     Entry<K,V> next = e.next;
-                    int i = indexFor(e.hash, newCapacity);
+                    int i = indexFor(e.hash, newCapacity); //根据hash值，在新尺寸数组找到桶位置。
                     e.next = newTable[i];
                     newTable[i] = e;
                     e = next;
@@ -749,19 +750,32 @@ public class HashMap<K,V>
      * Subclass overrides this to alter the behavior of put method.
      */
     void addEntry(int hash, K key, V value, int bucketIndex) {
-	Entry<K,V> e = table[bucketIndex];
-        table[bucketIndex] = new Entry<K,V>(hash, key, value, e);
+	Entry<K,V> e = table[bucketIndex]; //记录当前槽位节点
+        table[bucketIndex] = new Entry<K,V>(hash, key, value, e);//新建结点，其next域指向e
         if (size++ >= threshold)
-            resize(2 * table.length);
+            resize(2 * table.length); //插入元素后，长度加1，若长度超过阈值即 threshold = 装载因子*容量，则扩容为原来的两倍
     }
+  /*
+    起始：
+    talbe [1] = x
+    插入元素x2
+    则 table[1]=x2, x2.next=x1
+    即： x2->x1
+    插入元素x3:
+         x3->x2->x1
+    如此，最新插入元素总是在链表头，最后一个插入元素可以通过 桶槽位下标访问到。
 
+
+   */
     /**
      * Like addEntry except that this version is used when creating entries
      * as part of Map construction or "pseudo-construction" (cloning,
      * deserialization).  This version needn't worry about resizing the table.
      *
      * Subclass overrides this to alter the behavior of HashMap(Map),
-     * clone, and readObject.
+     * clone, and readObject
+     * 创建一个元素
+     * 同addEntry，将新元素next域指向原先槽位元素，并将新元素放到该槽位中。.
      */
     void createEntry(int hash, K key, V value, int bucketIndex) {
 	Entry<K,V> e = table[bucketIndex];
@@ -772,14 +786,14 @@ public class HashMap<K,V>
     private abstract class HashIterator<E> implements Iterator<E> {
         Entry<K,V> next;	// next entry to return
         int expectedModCount;	// For fast-fail
-        int index;		// current slot
-        Entry<K,V> current;	// current entry
+        int index;		// current slot 当前槽位
+        Entry<K,V> current;	// current entry 当前元素
 
         HashIterator() {
-            expectedModCount = modCount;
+            expectedModCount = modCount;  //在初始化时，记录modCount，用于在迭代过程中进行对比，实现快速失败
             if (size > 0) { // advance to first entry
                 Entry[] t = table;
-                while (index < t.length && (next = t[index++]) == null)
+                while (index < t.length && (next = t[index++]) == null)//找到第一个不为null的槽位为index
                     ;
             }
         }
@@ -789,13 +803,13 @@ public class HashMap<K,V>
         }
 
         final Entry<K,V> nextEntry() {
-            if (modCount != expectedModCount)
+            if (modCount != expectedModCount) //判断hash表尺寸是否被修改过
                 throw new ConcurrentModificationException();
             Entry<K,V> e = next;
             if (e == null)
                 throw new NoSuchElementException();
 
-            if ((next = e.next) == null) {
+            if ((next = e.next) == null) { //若下一个元素为空，则找到一个槽位不为null的为index
                 Entry[] t = table;
                 while (index < t.length && (next = t[index++]) == null)
                     ;
@@ -811,7 +825,7 @@ public class HashMap<K,V>
                 throw new ConcurrentModificationException();
             Object k = current.key;
             current = null;
-            HashMap.this.removeEntryForKey(k);
+            HashMap.this.removeEntryForKey(k); //调用外围类对象的方法移除
             expectedModCount = modCount;
         }
 
@@ -847,7 +861,7 @@ public class HashMap<K,V>
     }
 
 
-    // Views
+    // Views 视图窗口中 entrySet
 
     private transient Set<Map.Entry<K,V>> entrySet = null;
 
@@ -945,7 +959,7 @@ public class HashMap<K,V>
         return es != null ? es : (entrySet = new EntrySet());
     }
 
-    private final class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+    private final class EntrySet extends AbstractSet<Map.Entry<K,V>> { //内部类：EntrySet
         public Iterator<Map.Entry<K,V>> iterator() {
             return newEntryIterator();
         }
