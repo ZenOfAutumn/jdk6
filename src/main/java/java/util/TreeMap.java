@@ -8,16 +8,16 @@
 package java.util;
 
 /**
- * A Red-Black tree based {@link NavigableMap} implementation.
+ * A Red-Black tree based {@link NavigableMap} implementation  基于红黑树的实现，即该映射根据其键的自然顺序进行排序，或根据构造器传入的Comparator排序
  * The map is sorted according to the {@linkplain Comparable natural
  * ordering} of its keys, or by a {@link Comparator} provided at map
  * creation time, depending on which constructor is used.
- *
+ *                                                                           排序： 根据key，或 构造方法里提供的Comparator
  * <p>This implementation provides guaranteed log(n) time cost for the
  * <tt>containsKey</tt>, <tt>get</tt>, <tt>put</tt> and <tt>remove</tt>
  * operations.  Algorithms are adaptations of those in Cormen, Leiserson, and
  * Rivest's <I>Introduction to Algorithms</I>.
- *
+ *                                                                              性能 ： log(n)
  * <p>Note that the ordering maintained by a sorted map (whether or not an
  * explicit comparator is provided) must be <i>consistent with equals</i> if
  * this sorted map is to correctly implement the <tt>Map</tt> interface.  (See
@@ -29,7 +29,8 @@ package java.util;
  * standpoint of the sorted map, equal.  The behavior of a sorted map
  * <i>is</i> well-defined even if its ordering is inconsistent with equals; it
  * just fails to obey the general contract of the <tt>Map</tt> interface.
- *
+ *                                                              equals需要满足： 对称性，反对称性
+ *                                                              comparator需要与equals一致即： equals判断相等的，comparator也能判断出相等
  * <p><strong>Note that this implementation is not synchronized.</strong>
  * If multiple threads access a map concurrently, and at least one of the
  * threads modifies the map structurally, it <i>must</i> be synchronized
@@ -37,13 +38,13 @@ package java.util;
  * deletes one or more mappings; merely changing the value associated
  * with an existing key is not a structural modification.)  This is
  * typically accomplished by synchronizing on some object that naturally
- * encapsulates the map.
+ * encapsulates the map.                                                                                    非同步， 需外部同步
  * If no such object exists, the map should be "wrapped" using the
  * {@link Collections#synchronizedSortedMap Collections.synchronizedSortedMap}
  * method.  This is best done at creation time, to prevent accidental
  * unsynchronized access to the map: <pre>
  *   SortedMap m = Collections.synchronizedSortedMap(new TreeMap(...));</pre>
- *
+ *                                                                      Collections.synchronizedSortedMap() 将TreeMap包装成同步Map
  * <p>The iterators returned by the <tt>iterator</tt> method of the collections
  * returned by all of this class's "collection view methods" are
  * <i>fail-fast</i>: if the map is structurally modified at any time after the
@@ -52,7 +53,7 @@ package java.util;
  * ConcurrentModificationException}.  Thus, in the face of concurrent
  * modification, the iterator fails quickly and cleanly, rather than risking
  * arbitrary, non-deterministic behavior at an undetermined time in the future.
- *
+ * 快速迭代：在迭代访问过程中，调用了map修改尺寸的操作， 或调用了迭代器自身的remove()方法，都会抛出异常
  * <p>Note that the fail-fast behavior of an iterator cannot be guaranteed
  * as it is, generally speaking, impossible to make any hard guarantees in the
  * presence of unsynchronized concurrent modification.  Fail-fast iterators
@@ -60,6 +61,8 @@ package java.util;
  * Therefore, it would be wrong to write a program that depended on this
  * exception for its correctness:   <i>the fail-fast behavior of iterators
  * should be used only to detect bugs.</i>
+ * 依靠快速失败抛出的异常来 保证正确性， 是错误的程序
+ * 迭代器的快速失败行为应该只用于检测bug
  *
  * <p>All <tt>Map.Entry</tt> pairs returned by methods in this class
  * and its views represent snapshots of mappings at the time they were
@@ -223,7 +226,7 @@ public class TreeMap<K,V>
      * @since 1.2
      */
     public boolean containsValue(Object value) {
-        for (Entry<K,V> e = getFirstEntry(); e != null; e = successor(e))
+        for (Entry<K,V> e = getFirstEntry(); e != null; e = successor(e))// 通过中序遍历的后继节点，来实现遍历查找。
             if (valEquals(value, e.value))
                 return true;
         return false;
@@ -1936,7 +1939,7 @@ public class TreeMap<K,V>
      * Returns the first Entry in the TreeMap (according to the TreeMap's
      * key-sort function).  Returns null if the TreeMap is empty.
      */
-    final Entry<K,V> getFirstEntry() {
+    final Entry<K,V> getFirstEntry() {//查找第一个元素，即最左边的结点，值最小的元素。
         Entry<K,V> p = root;
         if (p != null)
             while (p.left != null)
@@ -1959,15 +1962,15 @@ public class TreeMap<K,V>
     /**
      * Returns the successor of the specified Entry, or null if no such.
      */
-    static <K,V> TreeMap.Entry<K,V> successor(Entry<K,V> t) {
+    static <K,V> TreeMap.Entry<K,V> successor(Entry<K,V> t) { //返回后继结点
         if (t == null)
             return null;
         else if (t.right != null) {
             Entry<K,V> p = t.right;
-            while (p.left != null)
+            while (p.left != null) //返回右子树的最左结点
                 p = p.left;
             return p;
-        } else {
+        } else { //若右子树为空，向上找到一个结点作为返回，其左子结点是t的祖先。
             Entry<K,V> p = t.parent;
             Entry<K,V> ch = t;
             while (p != null && ch == p.right) {
