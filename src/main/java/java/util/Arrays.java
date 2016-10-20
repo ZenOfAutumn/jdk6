@@ -1130,7 +1130,7 @@ public class Arrays {
      * high is the end index in dest to end sorting
      * off is the offset to generate corresponding low, high in src
      */
-    private static void mergeSort(Object[] src,
+    private static void mergeSort(Object[] src,  //合并排序
 				  Object[] dest,
 				  int low,
 				  int high,
@@ -1138,11 +1138,11 @@ public class Arrays {
 	int length = high - low;
 
 	// Insertion sort on smallest arrays
-        if (length < INSERTIONSORT_THRESHOLD) {
+        if (length < INSERTIONSORT_THRESHOLD) { //小型数组，即长度小于7时，使用插入排序。
             for (int i=low; i<high; i++)
                 for (int j=i; j>low &&
 			 ((Comparable) dest[j-1]).compareTo(dest[j])>0; j--)
-                    swap(dest, j, j-1);
+                    swap(dest, j, j-1); //循环，直到前面一个元素大于当前元素。否则 交换
             return;
         }
 
