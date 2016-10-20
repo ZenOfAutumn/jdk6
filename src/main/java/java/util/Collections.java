@@ -366,18 +366,19 @@ public class Collections {
      */
     public static void reverse(List<?> list) {
         int size = list.size();
-        if (size < REVERSE_THRESHOLD || list instanceof RandomAccess) {
+        if (size < REVERSE_THRESHOLD || list instanceof RandomAccess) {//长度小于18，且实现随机访问接口， 采用第i个元素 与第 size-i-1个元素对换方式实现反转
             for (int i=0, mid=size>>1, j=size-1; i<mid; i++, j--)
                 swap(list, i, j);
         } else {
             ListIterator fwd = list.listIterator();
             ListIterator rev = list.listIterator(size);
-            for (int i=0, mid=list.size()>>1; i<mid; i++) {
+            for (int i=0, mid=list.size()>>1; i<mid; i++) { //用List迭代器进行反转:两个迭代器分别指向list头和尾，进行交换。
 		Object tmp = fwd.next();
                 fwd.set(rev.previous());
                 rev.set(tmp);
             }
         }
+        //两种反转方式 实现原理一样，只是取数据方式不同，一个是利用索引取，另是一个是迭代器取。
     }
 
     /**
@@ -439,21 +440,21 @@ public class Collections {
      * @throws UnsupportedOperationException if the specified list or its
      *         list-iterator does not support the <tt>set</tt> operation.
      */
-    public static void shuffle(List<?> list, Random rnd) {
+    public static void shuffle(List<?> list, Random rnd) { //洗牌
         int size = list.size();
-        if (size < SHUFFLE_THRESHOLD || list instanceof RandomAccess) {
+        if (size < SHUFFLE_THRESHOLD || list instanceof RandomAccess) { //长度小于16 或 实现随机访问RandomAccess接口，直接用get,set进行交换。
             for (int i=size; i>1; i--)
-                swap(list, i-1, rnd.nextInt(i));
+                swap(list, i-1, rnd.nextInt(i)); //将i-1 元素与小于i的任何位置元素交换
         } else {
-            Object arr[] = list.toArray();
+            Object arr[] = list.toArray(); //转换为数组
 
             // Shuffle array
             for (int i=size; i>1; i--)
-                swap(arr, i-1, rnd.nextInt(i));
+                swap(arr, i-1, rnd.nextInt(i)); //基于数组的交换
 
             // Dump array back into list
             ListIterator it = list.listIterator();
-            for (int i=0; i<arr.length; i++) {
+            for (int i=0; i<arr.length; i++) { //利用迭代器将数组中元素复制回到list中
                 it.next();
                 it.set(arr[i]);
             }
@@ -498,14 +499,14 @@ public class Collections {
      * @throws UnsupportedOperationException if the specified list or its
      *	       list-iterator does not support the <tt>set</tt> operation.
      */
-    public static <T> void fill(List<? super T> list, T obj) {
+    public static <T> void fill(List<? super T> list, T obj) {//填充列表
         int size = list.size();
 
-        if (size < FILL_THRESHOLD || list instanceof RandomAccess) {
+        if (size < FILL_THRESHOLD || list instanceof RandomAccess) {//直接用list.set方式填充
             for (int i=0; i<size; i++)
                 list.set(i, obj);
         } else {
-            ListIterator<? super T> itr = list.listIterator();
+            ListIterator<? super T> itr = list.listIterator(); //用迭代器的set（）添加
             for (int i=0; i<size; i++) {
                 itr.next();
                 itr.set(obj);
@@ -535,11 +536,11 @@ public class Collections {
             throw new IndexOutOfBoundsException("Source does not fit in dest");
 
         if (srcSize < COPY_THRESHOLD ||
-            (src instanceof RandomAccess && dest instanceof RandomAccess)) {
+            (src instanceof RandomAccess && dest instanceof RandomAccess)) {//set方式复制
             for (int i=0; i<srcSize; i++)
                 dest.set(i, src.get(i));
         } else {
-            ListIterator<? super T> di=dest.listIterator();
+            ListIterator<? super T> di=dest.listIterator(); //迭代器方式复制
 	    ListIterator<? extends T> si=src.listIterator();
             for (int i=0; i<srcSize; i++) {
                 di.next();
@@ -3625,7 +3626,7 @@ public class Collections {
 	private static final long serialVersionUID = 1802017725587941708L;
         private final Deque<E> q;
         AsLIFOQueue(Deque<E> q)           { this.q = q; }
-        public boolean add(E e)           { q.addFirst(e); return true; }
+        public boolean add(E e)           { q.addFirst(e); return true; } //新增元素放前面，通过 peekFirst实现后进先出。
         public boolean offer(E e)         { return q.offerFirst(e); }
         public E poll()                   { return q.pollFirst(); }
         public E remove()                 { return q.removeFirst(); }
