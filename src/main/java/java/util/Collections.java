@@ -111,6 +111,10 @@ public class Collections {
      * @throws UnsupportedOperationException if the specified list's
      *	       list-iterator does not support the <tt>set</tt> operation.
      * @see Comparable
+     *  转成数组 Object[] a= list.toArray()
+    调用Arrays.sort(Object[] a)排序
+    排序后复制到list
+
      */
     public static <T extends Comparable<? super T>> void sort(List<T> list) {
 	Object[] a = list.toArray();
@@ -198,9 +202,9 @@ public class Collections {
     public static <T>
     int binarySearch(List<? extends Comparable<? super T>> list, T key) {
         if (list instanceof RandomAccess || list.size()<BINARYSEARCH_THRESHOLD)
-            return Collections.indexedBinarySearch(list, key);
+            return Collections.indexedBinarySearch(list, key);      //实现随机访问接口，且长度小于50000的list, :基于索引的二分搜索，例ArrayList.get(i)采用数组索引取数据
         else
-            return Collections.iteratorBinarySearch(list, key);
+            return Collections.iteratorBinarySearch(list, key); //基于迭代器的二分搜索， get(list,mid)使用迭代器，将游标滑到mid位置用于 iterator.next()取数据。
     }
 
     private static <T>
@@ -211,7 +215,7 @@ public class Collections {
 
 	while (low <= high) {
 	    int mid = (low + high) >>> 1;
-	    Comparable<? super T> midVal = list.get(mid);
+	    Comparable<? super T> midVal = list.get(mid); //直接取中间值 用list.get(i)
 	    int cmp = midVal.compareTo(key);
 
 	    if (cmp < 0)
@@ -233,7 +237,7 @@ public class Collections {
 
         while (low <= high) {
             int mid = (low + high) >>> 1;
-            Comparable<? super T> midVal = get(i, mid);
+            Comparable<? super T> midVal = get(i, mid); //用迭代器取数据时
             int cmp = midVal.compareTo(key);
 
             if (cmp < 0)
@@ -250,7 +254,7 @@ public class Collections {
      * Gets the ith element from the given list by repositioning the specified
      * list listIterator.
      */
-    private static <T> T get(ListIterator<? extends T> i, int index) {
+    private static <T> T get(ListIterator<? extends T> i, int index) { //使用迭代器取位置index的数据，而迭代器游标 滑向该位置。 因为Iterator只有nextIndex(), next()方法，没有get（i)故只能滑动游标，不能随机访问。
 	T obj = null;
         int pos = i.nextIndex();
         if (pos <= index) {

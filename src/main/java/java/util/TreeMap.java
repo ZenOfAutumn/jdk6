@@ -2074,7 +2074,7 @@ public class TreeMap<K,V>
     private void fixAfterInsertion(Entry<K,V> x) {
         x.color = RED;
 
-        while (x != null && x != root && x.parent.color == RED) {
+        while (x != null && x != root && x.parent.color == RED) {//https://en.wikipedia.org/wiki/Red%E2%80%93black_tree
             if (parentOf(x) == leftOf(parentOf(parentOf(x)))) {
                 Entry<K,V> y = rightOf(parentOf(parentOf(x)));
                 if (colorOf(y) == RED) {
@@ -2091,6 +2091,22 @@ public class TreeMap<K,V>
                     setColor(parentOf(parentOf(x)), RED);
                     rotateRight(parentOf(parentOf(x)));
                 }
+                /* 初始：
+                     ab
+                  br    cb
+                   xr
+                   不满足条件：红结点的孩子是黑结点
+                   左旋转：
+                   ab
+                 xr   cb
+               br
+                   //换色，右旋转，最终x结点位置
+                     xb
+                   br   ar
+                         cb
+                  使得x的原先父结点，祖父结点 成为x的左，右孩子结点。
+                 */
+                //注： 一旦父结点为红色，都需要旋转。
             } else {
                 Entry<K,V> y = leftOf(parentOf(parentOf(x)));
                 if (colorOf(y) == RED) {
@@ -2103,9 +2119,9 @@ public class TreeMap<K,V>
                         x = parentOf(x);
                         rotateRight(x);
                     }
-                    setColor(parentOf(x), BLACK);
+                    setColor(parentOf(x), BLACK); //x父节点与爷爷节点 颜色交换
                     setColor(parentOf(parentOf(x)), RED);
-                    rotateLeft(parentOf(parentOf(x)));
+                    rotateLeft(parentOf(parentOf(x))); //右旋转后，x以及其父结点，叔父结点三者符合性质。
                 }
             }
         }
@@ -2114,6 +2130,8 @@ public class TreeMap<K,V>
 
     /**
      * Delete node p, and then rebalance the tree.
+     * 将p后继节点s的key,value复制到p，然后删除该后继节点即左/右孩子替换该后继节点。
+     * 若删除的节点为黑色结点，需要重新对树进行平衡操作。
      */
     private void deleteEntry(Entry<K,V> p) {
         modCount++;
@@ -2121,7 +2139,7 @@ public class TreeMap<K,V>
 
         // If strictly internal, copy successor's element to p and then make p
         // point to successor.
-        if (p.left != null && p.right != null) {
+        if (p.left != null && p.right != null) { //将p后继节点s的key,value复制到p， 然后p指向s
             Entry<K,V> s = successor (p);
             p.key = s.key;
             p.value = s.value;
@@ -2130,7 +2148,7 @@ public class TreeMap<K,V>
 
         // Start fixup at replacement node, if it exists.
         Entry<K,V> replacement = (p.left != null ? p.left : p.right);
-
+      //将p的左孩子或右孩子替换p:方法：连接p.parent与p.left/p.right
         if (replacement != null) {
             // Link replacement to parent
             replacement.parent = p.parent;
@@ -2145,7 +2163,7 @@ public class TreeMap<K,V>
             p.left = p.right = p.parent = null;
 
             // Fix replacement
-            if (p.color == BLACK)
+            if (p.color == BLACK)    //若p为红色，则p的孩子、父亲必定为黑色，p删除二者连接无需调整。 若p为黑色，其孩子，父亲可能都为红色，二者连接需要调整（可能破坏性质：红结点的孩子是黑色）。
                 fixAfterDeletion(replacement);
         } else if (p.parent == null) { // return if we are the only node.
             root = null;
