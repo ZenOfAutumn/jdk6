@@ -240,9 +240,9 @@ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
     public V put(K key, V value) {
         typeCheck(key);
 
-        int index = ((Enum)key).ordinal();
-        Object oldValue = vals[index];
-        vals[index] = maskNull(value);
+        int index = ((Enum)key).ordinal(); //将key转为Enum类型，获取对应的次序
+        Object oldValue = vals[index];      //根据次序作为索引 从数组vals中取值
+        vals[index] = maskNull(value);          //替换旧值
         if (oldValue == null)
             size++;
         return unmaskNull(oldValue);

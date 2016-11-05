@@ -159,25 +159,26 @@ import java.util.NoSuchElementException;
  * @author Mark Reinhold
  * @version %I%, %E%
  * @since 1.6
+ * 从配置文件中加载 子类或接口的实现类
  */
 
 public final class ServiceLoader<S>
     implements Iterable<S>
 {
 
-    private static final String PREFIX = "META-INF/services/";
+    private static final String PREFIX = "META-INF/services/"; //主要是从该目录下加载子类或接口的实现类
 
     // The class or interface representing the service being loaded
-    private Class<S> service;
+    private Class<S> service; //被加载的类或接口
 
     // The class loader used to locate, load, and instantiate providers
-    private ClassLoader loader;
+    private ClassLoader loader;//类加载器
 
     // Cached providers, in instantiation order
-    private LinkedHashMap<String,S> providers = new LinkedHashMap<String,S>();
+    private LinkedHashMap<String,S> providers = new LinkedHashMap<String,S>(); //缓存服务提供者
 
     // The current lazy-lookup iterator
-    private LazyIterator lookupIterator;
+    private LazyIterator lookupIterator;//懒式lookup
 
     /**
      * Clear this loader's provider cache so that all providers will be
@@ -191,7 +192,7 @@ public final class ServiceLoader<S>
      * can be installed into a running Java virtual machine.
      */
     public void reload() {
-	providers.clear();
+	providers.clear(); //清空缓存，使其重新加载
 	lookupIterator = new LazyIterator(service, loader);
     }
 
@@ -222,7 +223,8 @@ public final class ServiceLoader<S>
 
     // Parse a single line from the given configuration file, adding the name
     // on the line to the names list.
-    //
+
+    //从给定的 配置文件中 格式化单行，并将其名字加到的命名列表。
     private int parseLine(Class service, URL u, BufferedReader r, int lc,
 			  List<String> names)
 	throws IOException, ServiceConfigurationError

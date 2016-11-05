@@ -106,8 +106,8 @@ import java.lang.ref.ReferenceQueue;
  * @author      Josh Bloch
  * @author	Mark Reinhold
  * @since	1.2
- * @see		java.util.HashMap
- * @see		java.lang.ref.WeakReference
+ * @see		HashMap
+ * @see		WeakReference
  */
 public class WeakHashMap<K,V>
     extends AbstractMap<K,V>
@@ -692,7 +692,7 @@ public class WeakHashMap<K,V>
             Map.Entry e = (Map.Entry)o;
             Object k1 = getKey();
             Object k2 = e.getKey();
-            if (k1 == k2 || (k1 != null && k1.equals(k2))) {
+            if (k1 == k2 || (k1 != null && k1.equals(k2))) { //Object.equals方法是 ==进行比较。
                 Object v1 = getValue();
                 Object v2 = e.getValue();
                 if (v1 == v2 || (v1 != null && v1.equals(v2)))
@@ -935,7 +935,7 @@ public class WeakHashMap<K,V>
 	private List<Map.Entry<K,V>> deepCopy() {
 	    List<Map.Entry<K,V>> list = new ArrayList<Map.Entry<K,V>>(size());
 	    for (Map.Entry<K,V> e : this)
-		list.add(new AbstractMap.SimpleEntry<K,V>(e));
+		list.add(new SimpleEntry<K,V>(e));
 	    return list;
 	}
 

@@ -20,6 +20,9 @@ import java.io.ObjectStreamException;
  * @author  Neal Gafter
  * @version %I%, %G%
  * @since   1.5
+ * Enum： 所有枚举类型的基本通用类
+  成员 及 方法均使用final修饰， =》Enum为不可继承的类。
+   使用方法见：AboutEnum
  */
 public abstract class Enum<E extends Enum<E>>
         implements Comparable<E>, Serializable {
@@ -145,7 +148,7 @@ public abstract class Enum<E extends Enum<E>>
 	Enum other = (Enum)o;
 	Enum self = this;
 	if (self.getClass() != other.getClass() && // optimization
-            self.getDeclaringClass() != other.getDeclaringClass())
+            self.getDeclaringClass() != other.getDeclaringClass()) //
 	    throw new ClassCastException();
 	return self.ordinal - other.ordinal;
     }
@@ -161,11 +164,13 @@ public abstract class Enum<E extends Enum<E>>
      *
      * @return the Class object corresponding to this enum constant's
      *     enum type
+     *    枚举常量的类型
+     *
      */
     public final Class<E> getDeclaringClass() {
 	Class clazz = getClass();
 	Class zuper = clazz.getSuperclass();
-	return (zuper == Enum.class) ? clazz : zuper;
+	return (zuper == Enum.class) ? clazz : zuper; //比较当前类的Class对象与 父类Class对象，相等则返回，不相等则返回父类Classi对象
     }
 
     /**
@@ -185,6 +190,7 @@ public abstract class Enum<E extends Enum<E>>
      * @throws NullPointerException if <tt>enumType</tt> or <tt>name</tt>
      *         is null
      * @since 1.5
+     * 根据 枚举类型及 名字，返回对应的值
      */
     public static <T extends Enum<T>> T valueOf(Class<T> enumType,
                                                 String name) {
@@ -199,6 +205,7 @@ public abstract class Enum<E extends Enum<E>>
 
     /**
       * prevent default deserialization
+     * 不支持序列化
       */
     private void readObject(ObjectInputStream in) throws IOException,
         ClassNotFoundException {
