@@ -829,7 +829,7 @@ public abstract class AbstractQueuedSynchronizer
      * @param arg the acquire argument
      * @return {@code true} if interrupted while waiting
      */
-    final boolean acquireQueued(final Node node, int arg) {
+    final boolean acquireQueued(final Node node, int arg) { //条件等待方法使用该方法获取
         try {
             boolean interrupted = false;
             for (;;) {
@@ -1633,6 +1633,7 @@ public abstract class AbstractQueuedSynchronizer
     }
 
     /**
+     * 转移节点，若需要，则在取消等待后同步队列，若线程在被 唤醒前被 取消则返回True
      * Transfers node, if necessary, to sync queue after a cancelled
      * wait. Returns true if thread was cancelled before being
      * signalled.
@@ -1640,9 +1641,9 @@ public abstract class AbstractQueuedSynchronizer
      * @param node its node
      * @return true if cancelled before the node was signalled.
      */
-    final boolean transferAfterCancelledWait(Node node) {
+    final boolean transferAfterCancelledWait(Node node) { //在取消等待后转移节点
         if (compareAndSetWaitStatus(node, Node.CONDITION, 0)) {
-            enq(node);
+            enq(node); //同步队列 入队
             return true;
         }
         /*
@@ -1947,7 +1948,7 @@ public abstract class AbstractQueuedSynchronizer
          */
         private int checkInterruptWhileWaiting(Node node) {
             return (Thread.interrupted()) ?
-                ((transferAfterCancelledWait(node))? THROW_IE : REINTERRUPT) :
+                ((transferAfterCancelledWait(node))? THROW_IE : REINTERRUPT) : //检查 是否在等待时中断，当节点取消等待时，转移节点
                 0;
         }
 
@@ -1980,15 +1981,15 @@ public abstract class AbstractQueuedSynchronizer
         public final void await() throws InterruptedException {
             if (Thread.interrupted())
                 throw new InterruptedException();
-            Node node = addConditionWaiter();
-            int savedState = fullyRelease(node);
+            Node node = addConditionWaiter(); //条件等待队列增加节点
+            int savedState = fullyRelease(node); //释放该节点关联的锁
             int interruptMode = 0;
-            while (!isOnSyncQueue(node)) {
+            while (!isOnSyncQueue(node)) {  //节点不在同步队列中？
                 LockSupport.park(this);
-                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0) //检查在等待时是否中断
                     break;
             }
-            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+            if (acquireQueued(node, savedState) && interruptMode != THROW_IE) //
                 interruptMode = REINTERRUPT;
             if (node.nextWaiter != null)
                 unlinkCancelledWaiters();
