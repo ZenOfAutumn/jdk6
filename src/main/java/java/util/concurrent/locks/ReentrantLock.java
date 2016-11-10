@@ -233,6 +233,11 @@ public class ReentrantLock implements Lock, java.io.Serializable {
     public ReentrantLock() {
         sync = new NonfairSync();
     }
+    /*
+    ReentrantLock 的公平与非公平锁 是一个桥接模式（不同的实现）
+     内部有 公平实现 ，非公平实现  （两个内部类的定义）
+     通过构造方法来选取哪一种实现。
+     */
 
     /**
      * Creates an instance of {@code ReentrantLock} with the

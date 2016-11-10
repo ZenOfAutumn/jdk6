@@ -921,6 +921,7 @@ public abstract class AbstractQueuedSynchronizer
     /**
      * Acquires in shared uninterruptible mode.
      * @param arg the acquire argument
+     *            不可中断的共享模式获取
      */
     private void doAcquireShared(int arg) {
         final Node node = addWaiter(Node.SHARED);
