@@ -98,7 +98,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * The default concurrency level for this table, used when not
      * otherwise specified in a constructor.
      */
-    static final int DEFAULT_CONCURRENCY_LEVEL = 16;
+    static final int DEFAULT_CONCURRENCY_LEVEL = 16; //默认的并发数
 
     /**
      * The maximum capacity, used if a higher value is implicitly
@@ -120,7 +120,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * unbounded retries if tables undergo continuous modification
      * which would make it impossible to obtain an accurate result.
      */
-    static final int RETRIES_BEFORE_LOCK = 2;
+    static final int RETRIES_BEFORE_LOCK = 2; //锁之前的尝试次数
 
     /* ---------------- Fields -------------- */
 
@@ -128,17 +128,17 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * Mask value for indexing into segments. The upper bits of a
      * key's hash code are used to choose the segment.
      */
-    final int segmentMask;
+    final int segmentMask;//段掩码
 
     /**
      * Shift value for indexing within segments.
      */
-    final int segmentShift;
+    final int segmentShift;//段内索引偏移值
 
     /**
      * The segments, each of which is a specialized hash table
      */
-    final Segment<K,V>[] segments;
+    final Segment<K,V>[] segments; //段数组
 
     transient Set<K> keySet;
     transient Set<Map.Entry<K,V>> entrySet;
@@ -168,6 +168,15 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * Returns the segment that should be used for key with given hash
      * @param hash the hash code for the key
      * @return the segment
+     * 根据给定的hash值，返回其所在分段
+     * 例：
+     * segmentShift =  28
+     * setmentMask =  15
+     *
+     * 取hash值高4位，映射到对应的分段中。
+     * 如：
+     *  hash =  01A0 0A05
+     *  将映射到 第 01个分段。
      */
     final Segment<K,V> segmentFor(int hash) {
         return segments[(hash >>> segmentShift) & segmentMask];
@@ -190,7 +199,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
     static final class HashEntry<K,V> {
         final K key;
         final int hash;
-        volatile V value;
+        volatile V value; //value域为volatile修饰。 避免在数据竞争时非同步读 会读到null值而非初始值
         final HashEntry<K,V> next;
 
         HashEntry(K key, int hash, HashEntry<K,V> next, V value) {
@@ -253,6 +262,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
 
         /**
          * The number of elements in this segment's region.
+         * 段内元素个数
          */
         transient volatile int count;
 
@@ -263,6 +273,7 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
          * of segments computing size or checking containsValue, then
          * we might have an inconsistent view of state so (usually)
          * must retry.
+         * 修改表尺寸的次数
          */
         transient int modCount;
 
@@ -580,6 +591,18 @@ public class ConcurrentHashMap<K, V> extends AbstractMap<K, V>
      * @throws IllegalArgumentException if the initial capacity is
      * negative or the load factor or concurrencyLevel are
      * nonpositive.
+     *
+     * 初始默认值：
+     * sshift = 0
+     * ssize = 1
+     *
+     * concurrentLevel = 16
+     * ssize = 16
+     * sshift = 4
+     * segmentShift = 32 - 4 = 28
+     * segmentMask = 16 - 1 = 15
+     *
+     * 共16个分段
      */
     public ConcurrentHashMap(int initialCapacity,
                              float loadFactor, int concurrencyLevel) {

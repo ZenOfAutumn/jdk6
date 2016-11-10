@@ -62,7 +62,9 @@ import java.util.concurrent.TimeUnit;
  * taken to ensure that all code that is executed while the lock is
  * held is protected by try-finally or try-catch to ensure that the
  * lock is released when necessary.
- *
+ * 非阻塞式地获取锁：tryLock()
+ * 可中断地获取锁：lockInterruptibly()
+ * 超时地获取锁：tryLock(long,TimeUnit)
  * <p>{@code Lock} implementations provide additional functionality
  * over the use of {@code synchronized} methods and statements by
  * providing a non-blocking attempt to acquire a lock ({@link
@@ -75,6 +77,8 @@ import java.util.concurrent.TimeUnit;
  * such as guaranteed ordering, non-reentrant usage, or deadlock
  * detection. If an implementation provides such specialized semantics
  * then the implementation must document those semantics.
+ * Lock 与 隐藏监视器锁（synchronized)行为不同：
+ *  提供保证有序、不可重入使用， 死锁检测
  *
  * <p>Note that {@code Lock} instances are just normal objects and can
  * themselves be used as the target in a {@code synchronized} statement.
@@ -104,7 +108,7 @@ import java.util.concurrent.TimeUnit;
  * Unsuccessful locking and unlocking operations, and reentrant
  * locking/unlocking operations, do not require any memory
  * synchronization effects.
- *
+ * 不成功的获取锁和解锁，可重入的获取锁和解锁，都不需要任何内存同步效果。
  * <h3>Implementation Considerations</h3>
  *
  * <p> The three forms of lock acquisition (interruptible,
@@ -128,9 +132,9 @@ import java.util.concurrent.TimeUnit;
  * shown that the interrupt occurred after another action may have unblocked
  * the thread. An implementation should document this behavior.
  *
- * @see ReentrantLock
- * @see Condition
- * @see ReadWriteLock
+ * @see ReentrantLock 可重入锁
+ * @see Condition    条件
+ * @see ReadWriteLock  读写锁
  *
  * @since 1.5
  * @author Doug Lea
@@ -143,7 +147,7 @@ public interface Lock {
      * <p>If the lock is not available then the current thread becomes
      * disabled for thread scheduling purposes and lies dormant until the
      * lock has been acquired.
-     *
+      若未获取到锁，进入等待队列
      * <p><b>Implementation Considerations</b>
      *
      * <p>A {@code Lock} implementation may be able to detect erroneous use
@@ -151,6 +155,7 @@ public interface Lock {
      * may throw an (unchecked) exception in such circumstances.  The
      * circumstances and the exception type must be documented by that
      * {@code Lock} implementation.
+     * 检测死锁
      */
     void lock();
 
@@ -159,11 +164,11 @@ public interface Lock {
      * {@linkplain Thread#interrupt interrupted}.
      *
      * <p>Acquires the lock if it is available and returns immediately.
-     *
+     * 获取到锁，则立即返回
      * <p>If the lock is not available then the current thread becomes
      * disabled for thread scheduling purposes and lies dormant until
      * one of two things happens:
-     *
+     *锁被占用，则进入等待队列，直到： 锁获取到，或其他线程中断当前线程
      * <ul>
      * <li>The lock is acquired by the current thread; or
      * <li>Some other thread {@linkplain Thread#interrupt interrupts} the
@@ -175,7 +180,7 @@ public interface Lock {
      * <li>has its interrupted status set on entry to this method; or
      * <li>is {@linkplain Thread#interrupt interrupted} while acquiring the
      * lock, and interruption of lock acquisition is supported,
-     * </ul>
+     * </ul>若当前线程设置中断状态，或在获取锁时被中断，则抛出异常，并清除中断状态。
      * then {@link InterruptedException} is thrown and the current thread's
      * interrupted status is cleared.
      *
@@ -195,7 +200,7 @@ public interface Lock {
      * cause deadlock, and may throw an (unchecked) exception in such
      * circumstances.  The circumstances and the exception type must
      * be documented by that {@code Lock} implementation.
-     *
+     *可实现检测 死锁，抛出异常
      * @throws InterruptedException if the current thread is
      *         interrupted while acquiring the lock (and interruption
      *         of lock acquisition is supported).
@@ -234,13 +239,15 @@ public interface Lock {
     /**
      * Acquires the lock if it is free within the given waiting time and the
      * current thread has not been {@linkplain Thread#interrupt interrupted}.
-     *
+     *在给定时间内，并且当前线程未被中断，获取锁。
      * <p>If the lock is available this method returns immediately
-     * with the value {@code true}.
+     * with the value {@code true}.有锁可用时，立即返回。
      * If the lock is not available then
      * the current thread becomes disabled for thread scheduling
      * purposes and lies dormant until one of three things happens:
      * <ul>
+     *     当无可用锁时，当前线程进入等待队列。以下三种情况之一可能发生：
+     *
      * <li>The lock is acquired by the current thread; or
      * <li>Some other thread {@linkplain Thread#interrupt interrupts} the
      * current thread, and interruption of lock acquisition is supported; or
